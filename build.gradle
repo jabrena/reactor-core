@@ -22,13 +22,13 @@ buildscript {
 	maven { url "https://repo.spring.io/plugins-release" }
   }
   dependencies {
-	classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
-	classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
+	classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7' //still uses the old ways
 	classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
   }
 }
 
 plugins {
+  id "com.github.johnrengelman.shadow" version "4.0.2"
   id 'org.asciidoctor.convert' version '1.5.11'
   id "me.champeau.gradle.japicmp" version "0.2.6"
   id "de.undercouch.download" version "3.4.3"
