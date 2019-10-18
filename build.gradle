@@ -33,6 +33,7 @@ plugins {
   id "me.champeau.gradle.japicmp" version "0.2.6"
   id "de.undercouch.download" version "3.4.3"
   id "org.unbroken-dome.test-sets" version "2.1.1" apply false // 2.x version does not work with Gradle 4.10
+  id 'com.gradle.build-scan' version '2.4.2'
 }
 
 apply from: "gradle/doc.gradle"
@@ -86,6 +87,20 @@ ext {
 						  '!javax.annotation',
 						  '!javax.annotation.meta',
 						  '*']
+}
+
+//only publish scan if a specific gradle entreprise server is passed
+//typically, for local usage, you would temporarily set the env with:
+// `GRADLE_ENTERPRISE_URL=https://myge.example.com/ gradle foo`
+if (System.getenv('GRADLE_ENTERPRISE_URL')) {
+  buildScan {
+	captureTaskInputFiles = true
+	obfuscation {
+	  ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
+	}
+	publishAlways()
+	server = System.getenv('GRADLE_ENTERPRISE_URL')
+  }
 }
 
 configure(subprojects) { p ->
