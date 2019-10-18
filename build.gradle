@@ -22,7 +22,6 @@ buildscript {
   }
   dependencies {
 	classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
-	classpath 'io.spring.gradle:spring-io-plugin:0.0.4.RELEASE'
 	classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
 	classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
   }
@@ -129,7 +128,7 @@ configure(subprojects) { p ->
 
   repositories {
 	mavenLocal()
-	if (version.endsWith('BUILD-SNAPSHOT') || project.hasProperty('platformVersion')) {
+	if (version.endsWith('BUILD-SNAPSHOT')) {
 	  maven { url 'https://repo.spring.io/libs-snapshot' }
 	}
 
@@ -262,18 +261,6 @@ configure(subprojects) { p ->
 	}
   }
 
-}
-
-if (project.hasProperty('platformVersion')) {
-  apply plugin: 'spring-io'
-
-  dependencyManagement {
-	springIoTestRuntime {
-	  imports {
-		mavenBom "io.spring.platform:platform-bom:$platformVersion"
-	  }
-	}
-  }
 }
 
 assemble.dependsOn docsZip
