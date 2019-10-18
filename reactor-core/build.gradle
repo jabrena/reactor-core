@@ -18,6 +18,7 @@ import me.champeau.gradle.japicmp.JapicmpTask
 apply plugin: 'idea' //needed to avoid IDEA seeing the jmh folder as source
 apply plugin: 'osgi'
 apply plugin: 'org.unbroken-dome.test-sets'
+apply plugin: 'kotlin'
 
 sourceSets {
   noMicrometerTest {

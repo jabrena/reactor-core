@@ -16,6 +16,7 @@
 import me.champeau.gradle.japicmp.JapicmpTask
 
 apply plugin: 'osgi'
+apply plugin: 'kotlin'
 
 description = 'Reactor Test support'
 
