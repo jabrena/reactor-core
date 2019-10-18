@@ -124,6 +124,7 @@ task japicmp(type: JapicmpTask) {
 //	methodExcludes = ["reactor.core.Scannable#operatorName()"]
 }
 
+//TODO this should go into an imported javadoc.gradle
 javadoc {
   dependsOn jar
   group = "documentation"
@@ -220,6 +221,7 @@ check {
   }
 }
 
+//TODO all java9 / stubs / java-specific stuff should go in a convention plugin ?
 if (!JavaVersion.current().isJava9Compatible()) {
   test {
 	jvmArgs = ["-Xbootclasspath/p:" + configurations.jsr166backport.asPath]
