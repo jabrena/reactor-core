@@ -59,6 +59,8 @@ ext {
 	println "Detected CI environment: $ciServers"
   }
 
+  publishedProjects = subprojects - project(':benchmarks')
+
   // Metrics
   micrometerVersion = 'latest.release' //TODO specify a version of micrometer?
 
@@ -269,3 +271,9 @@ configure(subprojects) { p ->
 }
 
 assemble.dependsOn docsZip
+
+configure(publishedProjects) {
+	project.tasks.withType(Javadoc).all {
+		println "JDK Javadoc link for ${project.name} is ${rootProject.jdkJavadoc}"
+  }
+}
