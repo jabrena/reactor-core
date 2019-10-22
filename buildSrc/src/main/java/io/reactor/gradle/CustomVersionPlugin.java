@@ -61,20 +61,22 @@ public class CustomVersionPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		String version = project.getVersion().toString();
 		Object versionBranchProperty = project.getProperties().get(CUSTOM_VERSION_PROPERTY);
-		if (versionBranchProperty != null) {
-			String versionBranch = versionBranchProperty.toString();
-			if (ONLY_ALPHANUMERIC_PATTERN.matcher(versionBranch).matches()) {
-				if (version.endsWith(SNAPSHOT_SUFFIX)) {
-					String realVersion = version.replace(SNAPSHOT_SUFFIX, "." + versionBranch + SNAPSHOT_SUFFIX);
-					project.setVersion(realVersion);
-					//TODO use logger?
-					System.out.println("Building custom snapshot for " + project + ": '" + project.getVersion() + "' (osgi: '" + osgiHelper.getVersion(realVersion) + "')");
-				}
-			}
-			else {
-				throw new InvalidUserDataException("Custom version for project passed through -PversionBranch must be alphanumeric chars only: " + versionBranch);
-			}
+		if (versionBranchProperty == null) {
+			return;
 		}
+
+		String versionBranch = versionBranchProperty.toString();
+		if (!ONLY_ALPHANUMERIC_PATTERN.matcher(versionBranch).matches()) {
+			throw new InvalidUserDataException("Custom version for project passed through -PversionBranch must be alphanumeric chars only: " + versionBranch);
+		}
+
+		if (!version.endsWith(SNAPSHOT_SUFFIX)) {
+			return;
+		}
+
+		String realVersion = version.replace(SNAPSHOT_SUFFIX, "." + versionBranch + SNAPSHOT_SUFFIX);
+		project.setVersion(realVersion);
+		System.out.println("Building custom snapshot for " + project + ": '" + project.getVersion() + "' (osgi: '" + osgiHelper.getVersion(realVersion) + "')");
 	}
 
 }

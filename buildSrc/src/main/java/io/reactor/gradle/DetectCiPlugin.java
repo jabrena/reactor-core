@@ -50,17 +50,20 @@ public class DetectCiPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		if (project.getParent() == null) {
-			Set<String> detected = new HashSet<>(CI_SERVERS);
-			detected.retainAll(environmentSupplier.get());
-
-			boolean isCiServer = !detected.isEmpty();
-			if (isCiServer) {
-				System.out.println("Detected CI environment: " + detected);
-			}
-
-			project.getExtensions().add(FLAG_EXTENSION, isCiServer);
-			project.getExtensions().add(DETECTED_EXTENSION, detected);
+		//ignore subprojects
+		if (project.getParent() != null) {
+			return;
 		}
+
+		Set<String> detected = new HashSet<>(CI_SERVERS);
+		detected.retainAll(environmentSupplier.get());
+
+		boolean isCiServer = !detected.isEmpty();
+		if (isCiServer) {
+			System.out.println("Detected CI environment: " + detected);
+		}
+
+		project.getExtensions().add(FLAG_EXTENSION, isCiServer);
+		project.getExtensions().add(DETECTED_EXTENSION, detected);
 	}
 }

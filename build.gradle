@@ -39,12 +39,12 @@ apply from: "gradle/asciidoc.gradle" //asciidoc (which is generated from root di
 apply from: "gradle/setup.gradle"
 
 ext {
-  jdk = JavaVersion.current().majorVersion
-  jdkJavadoc = "https://docs.oracle.com/javase/$jdk/docs/api/"
-  if (JavaVersion.current().isJava11Compatible()) {
-	jdkJavadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/"
-  }
-  println "JDK Javadoc link for this build is ${rootProject.jdkJavadoc}"
+	jdk = JavaVersion.current().majorVersion
+	jdkJavadoc = "https://docs.oracle.com/javase/$jdk/docs/api/"
+	if (JavaVersion.current().isJava11Compatible()) {
+		jdkJavadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/"
+	}
+	println "JDK Javadoc link for this build is ${rootProject.jdkJavadoc}"
 
   // Metrics
   micrometerVersion = 'latest.release' //TODO specify a version of micrometer?
@@ -72,14 +72,14 @@ ext {
 //typically, for local usage, you would temporarily set the env with:
 // `GRADLE_ENTERPRISE_URL=https://myge.example.com/ gradle foo`
 if (System.getenv('GRADLE_ENTERPRISE_URL')) {
-  buildScan {
-	captureTaskInputFiles = true
-	obfuscation {
-	  ipAddresses { addresses -> addresses.collect { address -> '0.0.0.0'} }
+	buildScan {
+		captureTaskInputFiles = true
+		obfuscation {
+			ipAddresses { addresses -> addresses.collect { '0.0.0.0' } }
+		}
+		publishAlways()
+		server = System.getenv('GRADLE_ENTERPRISE_URL')
 	}
-	publishAlways()
-	server = System.getenv('GRADLE_ENTERPRISE_URL')
-  }
 }
 
 configure(subprojects) { p ->
