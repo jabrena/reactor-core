@@ -39,18 +39,7 @@ plugins {
 apply from: "gradle/doc.gradle" //asciidoc (which is generated from root dir)
 apply from: "gradle/setup.gradle"
 
-
 ext {
-  //TODO potential plugin?
-  //also set up the special version at root, for refguide
-  if (project.hasProperty('versionBranch') && version.toString().endsWith(".BUILD-SNAPSHOT")) {
-	versionBranch = versionBranch.replaceAll("\"", "").trim()
-	if (!versionBranch.isEmpty()) {
-	  realVersion = version.toString().replace("BUILD-SNAPSHOT", versionBranch + ".BUILD-SNAPSHOT")
-	  project.version = realVersion
-	}
-  }
-
   //TODO potential plugin ?
   def ciServers = ["CI", "CONTINUOUS_INTEGRATION", "TRAVIS", "CIRCLECI", "bamboo_planKey"]
   ciServers.retainAll(System.getenv().keySet())
@@ -114,21 +103,6 @@ configure(subprojects) { p ->
 
   description = 'Non-Blocking Reactive Foundation for the JVM'
   group = 'io.projectreactor'
-
-  ext {
-	//TODO extract to plugin? can the plugin apply to both root and subprojects?
-	//set up special version per sub-project
-	//(the root level configuration doesn't seem to propagate)
-	if (project.hasProperty('versionBranch') && version.toString().endsWith(".BUILD-SNAPSHOT")) {
-	  versionBranch = versionBranch.replaceAll("\"", "").trim()
-	  if (!versionBranch.isEmpty()) {
-		realVersion = p.version.toString().replace("BUILD-SNAPSHOT", versionBranch + ".BUILD-SNAPSHOT")
-		p.version = realVersion
-		println "Building special ${project} snapshot ${p.version}"
-		println "OSGI version would be: ${new OsgiHelper().getVersion(p.version.toString())}"
-	  }
-	}
-  }
 
   repositories {
 	mavenLocal()
@@ -267,10 +241,13 @@ configure(subprojects) { p ->
 	  }
 	}
   }
-
 }
 
 assemble.dependsOn docsZip
+
+gradle.allprojects() {
+	apply plugin: "io.reactor.gradle.custom-version"
+}
 
 configure(publishedProjects) {
 	project.tasks.withType(Javadoc).all {
