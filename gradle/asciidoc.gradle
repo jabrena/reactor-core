@@ -17,6 +17,17 @@ configure(rootProject) {
 	apply plugin: 'org.asciidoctor.convert'
 
 	asciidoctor {
+	  inputs.dir("docs/asciidoc/")
+			.withPropertyName("asciidocFiles")
+			.withPathSensitivity(PathSensitivity.RELATIVE)
+
+	  if (isCiServer || !rootProject.version.toString().endsWith(".BUILD-SNAPSHOT")) {
+		backends = ["html5", "pdf"]
+	  }
+	  else {
+		backends = ["html5"]
+	  }
+
 	  sourceDir "$rootDir/docs/asciidoc/"
 	  sources {
 		include "index.asciidoc"
@@ -28,7 +39,6 @@ configure(rootProject) {
 		}
 	  }
 	  outputDir file("$buildDir/docs/asciidoc")
-	  backends = ['html5', 'pdf']
 		logDocuments = true
 		options = [
 				doctype: 'book'
