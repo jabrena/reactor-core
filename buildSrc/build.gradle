@@ -44,5 +44,9 @@ gradlePlugin {
 	  id = "io.reactor.gradle.custom-version"
 	  implementationClass = "io.reactor.gradle.CustomVersionPlugin"
 	}
+	javaConventionsPlugin {
+	  id = "io.reactor.gradle.java-conventions"
+	  implementationClass = "io.reactor.gradle.JavaConventions"
+	}
   }
 }

@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.gradle.api.internal.plugins.osgi.OsgiHelper
-
 buildscript {
   //we define kotlin version for benefit of both core and test (see kotlin-gradle-plugin below)
   ext.kotlinVersion = '1.3.31'
@@ -36,7 +34,7 @@ plugins {
   id 'com.gradle.build-scan' version '2.4.2'
 }
 
-apply from: "gradle/doc.gradle" //asciidoc (which is generated from root dir)
+apply from: "gradle/asciidoc.gradle" //asciidoc (which is generated from root dir)
 apply from: "gradle/setup.gradle"
 
 ext {
@@ -48,7 +46,12 @@ ext {
 	println "Detected CI environment: $ciServers"
   }
 
-  publishedProjects = subprojects - project(':benchmarks')
+  jdk = JavaVersion.current().majorVersion
+  jdkJavadoc = "https://docs.oracle.com/javase/$jdk/docs/api/"
+  if (JavaVersion.current().isJava11Compatible()) {
+	jdkJavadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/"
+  }
+  println "JDK Javadoc link for this build is ${rootProject.jdkJavadoc}"
 
   // Metrics
   micrometerVersion = 'latest.release' //TODO specify a version of micrometer?
@@ -63,16 +66,6 @@ ext {
   jUnitParamsVersion = '1.1.1'
   awaitilityVersion = '3.1.2'
   throwingFunctionVersion = '1.5.0'
-
-  jdk = JavaVersion.current().majorVersion
-  jdkJavadoc = "https://docs.oracle.com/javase/$jdk/docs/api/"
-  if (JavaVersion.current().isJava11Compatible()) {
-	jdkJavadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/"
-  }
-
-  javadocLinks = [jdkJavadoc,
-				  "https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/"] as String[]
-
 
   bundleImportPackages = ['org.slf4j;resolution:=optional;version="[1.5.4,2)"',
 						  'kotlin.*;resolution:=optional',
@@ -125,58 +118,6 @@ configure(subprojects) { p ->
 	reports {
 	  xml.enabled = true
 	  html.enabled = true
-	}
-  }
-
-  //TODO typically this would go to an imported .gradle or a java plugin convention
-  [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-  [compileJava, compileTestJava]*.options*.compilerArgs =
-		  ["-Xlint:-varargs", // intentionally disabled
-		   "-Xlint:cast",
-		   "-Xlint:classfile",
-		   "-Xlint:dep-ann",
-		   "-Xlint:divzero",
-		   "-Xlint:empty",
-		   "-Xlint:finally",
-		   "-Xlint:overrides",
-		   "-Xlint:path",
-		   "-Xlint:processing",
-		   "-Xlint:static",
-		   "-Xlint:try",
-		   "-Xlint:deprecation",
-		   "-Xlint:unchecked",
-		   "-Xlint:-serial",      // intentionally disabled
-		   "-Xlint:-options",     // intentionally disabled
-		   "-Xlint:-fallthrough", // intentionally disabled
-		   "-Xlint:-rawtypes"     // TODO enable and fix warnings
-		  ]
-
-  compileJava {
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
-  }
-
-  compileTestJava {
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
-  }
-
-  pluginManager.withPlugin("kotlin") {
-	compileKotlin {
-	  kotlinOptions.jvmTarget = "1.8"
-	  kotlinOptions.freeCompilerArgs = ["-Xjsr305=strict"]
-	}
-
-	compileTestKotlin {
-	  kotlinOptions.jvmTarget = "1.8"
-	  kotlinOptions.freeCompilerArgs = ["-Xjsr305=strict"]
-	}
-  }
-
-  if (JavaVersion.current().isJava8Compatible()) {
-	compileTestJava.options.compilerArgs += "-parameters"
-	p.tasks.withType(Javadoc) {
-	  options.addStringOption('Xdoclint:none', '-quiet')
 	}
   }
 
@@ -245,12 +186,27 @@ configure(subprojects) { p ->
 
 assemble.dependsOn docsZip
 
-gradle.allprojects() {
-	apply plugin: "io.reactor.gradle.custom-version"
+gradle.allprojects() { p ->
+  apply plugin: "io.reactor.gradle.custom-version"
 }
 
-configure(publishedProjects) {
-	project.tasks.withType(Javadoc).all {
-		println "JDK Javadoc link for ${project.name} is ${rootProject.jdkJavadoc}"
+configure(subprojects) { p ->
+  //these apply once the above configure is done, but before project-specific build.gradle have applied
+  apply plugin: "io.reactor.gradle.java-conventions"
+  apply from: "${rootDir}/gradle/javadoc.gradle"
+
+  //these apply AFTER project-specific build.gradle have applied
+  afterEvaluate {
+	if (p.plugins.hasPlugin("kotlin")) {
+	  println "Applying Kotlin conventions to ${p.name}"
+	  compileKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xjsr305=strict"]
+	  }
+	  compileTestKotlin {
+		kotlinOptions.jvmTarget = "1.8"
+		kotlinOptions.freeCompilerArgs = ["-Xjsr305=strict"]
+	  }
+	}
   }
 }
