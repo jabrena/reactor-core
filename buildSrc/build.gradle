@@ -44,6 +44,10 @@ gradlePlugin {
 	  id = "io.reactor.gradle.custom-version"
 	  implementationClass = "io.reactor.gradle.CustomVersionPlugin"
 	}
+	detectCIPlugin {
+	  id = "io.reactor.gradle.detect-ci"
+	  implementationClass = "io.reactor.gradle.DetectCiPlugin"
+	}
 	javaConventionsPlugin {
 	  id = "io.reactor.gradle.java-conventions"
 	  implementationClass = "io.reactor.gradle.JavaConventions"

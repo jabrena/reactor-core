@@ -188,7 +188,7 @@ task testNoMicrometer(type: Test, group: 'verification') {
 check {
   dependsOn testStaticInit
   dependsOn testNoMicrometer
-  if (System.env.TRAVIS != "true") {
+  if (!detectedCiServers.contains("TRAVIS")) {
 	dependsOn testNG
   }
   if (!version.endsWith('BUILD-SNAPSHOT')) {
